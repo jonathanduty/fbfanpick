@@ -1,0 +1,18 @@
+
+#body {
+    width: 100%;
+    height: 100%;
+}
+.screen {
+    display: none;
+}
+
+.create-pick-screen #create-pick{
+    display: block;
+}
+
+
+.review-pick-screen #review-pick{
+    display: block;
+}
+

@@ -10,51 +10,77 @@
 	</script>
 	<script src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php" type="text/javascript">
 	</script>
-	<script src="/static/jquery.yelp.js" type-"text/javascript"></script>
+	<script src="/static/jquery.fan.js" type-"text/javascript"></script>
+	<style type="text/css" src="/static/style.css"/>
 	
 	<script type="text/javascript">
-	
-		$(document).ready(function() {
-			alert("hello");
-			$("#restaurant-name").yelpSearch("nmy79YuGmuFAHpYkdrbwsA",$("results"));
-		});
+		$(document).
 	</script>
 	<script type="text/javascript">
-		//<![CDATA[ 
-		var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
-		var channel_path = '/static/xd_receiver.htm';
-		FB_RequireFeatures(["Api"], function(){
-		    // Create an ApiClient object, passing app's API key and 
-		    // a site relative URL to xd_receiver.htm
-		    FB.Facebook.init(api_key, channel_path);
-    
-		    var api = FB.Facebook.apiClient;
-		    // require user to login 
-		    api.requireLogin(function(exception){
-		        FB.FBDebug.logLevel=1;
-		        FB.FBDebug.dump("Current user id is " + api.get_session().uid);
-		        // Get friends list 
-        
-		       //5-14-09: this code below is broken, correct code follows 
-		       //api.friends_get(null, function(result){
-		       //     Debug.dump(result, 'friendsResult from non-batch execution ');
-		       // });
-
-		         api.friends_get(new Array(), function(result, exception){
-		              FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
-		         });
-		    });
-		});
-		//]]>
+		// //<![CDATA[ 
+		// var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
+		// var channel_path = '/static/xd_receiver.htm';
+		// FB_RequireFeatures(["Api"], function(){
+		//     // Create an ApiClient object, passing app's API key and 
+		//     // a site relative URL to xd_receiver.htm
+		//     FB.Facebook.init(api_key, channel_path);
+		//     
+		//     var api = FB.Facebook.apiClient;
+		//     // require user to login 
+		//     api.requireLogin(function(exception){
+		//         FB.FBDebug.logLevel=1;
+		//         FB.FBDebug.dump("Current user id is " + api.get_session().uid);
+		// 
+		// 
+		// 		
+		//         // Get friends list 
+		//         
+		//        //5-14-09: this code below is broken, correct code follows 
+		//        //api.friends_get(null, function(result){
+		//        //     Debug.dump(result, 'friendsResult from non-batch execution ');
+		//        // });
+		// 
+		//          api.friends_get(new Array(), function(result, exception){
+		//               FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
+		//          });
+		//     });
+		// });
+		// //]]>
 	</script>
 	
+	<div id="body">
+		<div id="create-pick" class="screen">
+				<label for="home-team">Home Team</label>
+				<input type="text" id="home-team"/>
+				<input type="radio" name="group1" value="true"checked="true"> win</input>
+				<br>
+				<label for="visiting-team">Visiting Team</label>
+				<input type="text" id="visiting-team"/>
+				<input type="radio" name="group1" value="true" >win</input>
+				<br>
+				<label for="comments">Comments</label>
+				<textarea type="text" id="comments"/>
+			
+				<a href="" id="submit-create-pick">Create Pick</a>
+		</div>
 	
-	
-	<form action="">
-	<input type='text' name="name" id="restaurant-name">
-	<p id="restaurant-search">Search</p>
-	
-	<div id="results">
+		<div id="verify-pick" class="screen">
+				<p>Please Review your Pick</p>
+				<label for="home-team">Home Team</label>
+				<input type="text" id="home-team"/>
+				<input type="radio" name="group1" value="true"checked="true"> win</input>
+				<br>
+				<label for="visiting-team">Visiting Team</label>
+				<input type="text" id="visiting-team"/>
+				<input type="radio" name="group1" value="true" >win</input>
+				<br>
+				<label for="comments">Comments</label>
+				<textarea type="text" id="comments"/>	
+				<a href="" id="submit-review-pick-ok">Save Pick</a>
+				<br>
+				<a href="" id="submit-review-pick-go-back">Go Back</a>
+				
+		</div>
 	</div>
 </body>
 </html>

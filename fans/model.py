@@ -1,36 +1,56 @@
 from google.appengine.ext import db
 from django.utils import simplejson
 
-class League(db.Model):
+
+
+class ModelMixin(db.Model):
     
-    name = db.StringProperty(required=True)
+    def __get_key(self):
+        return self.key()
     
-    
-    def to_json(self):
-        return simplejson.dumps({"id":self.key(),"name":self.name})
+    id_ = property(__get_key)
+
+
         
+        
+class GamePick(ModelMixin):
     
-class Team(db.Model):
     
-    name = db.StringProperty(required=True)
-    league = db.ReferenceProperty(League)
+    fb_user_id = db.StringProperty()
     
+    home_team = db.StringProperty()
+    
+    visitor_team = db.StringProperty()
+    
+    
+    game_time = db.DateTimeProperty(required=False)
+    
+    home_team_winner = db.BooleanProperty()
     
     def to_json():
-        return simplejson.dumps({"id":self.key(),"name":self.name,"league":self.league.to_json()})
+        return simplejson.dumps({"id":self.key(),
+                    "visiting_team":self.visiting_team
+                    "home_team":self.home_team,
+                    "game_time":str(self.game_time),
+                    "fb_user_id":self.fb_user_id
+                    })
         
-# class Game(db.Model):
-#     
-#     
-#     home_team = db.ReferenceProperty(Team)
-#     
-#     visiting_team = db.ReferenceProperty(Team)
-#     
-#     game_time = db.DateTimeProperty(required=False)
-#     
-#     def to_json():
-#         return simplejson.dumps({"id":self.key(),
-#                     "visiting_team":self.visiting_team.to_json(),
-#                     "home_team":self.home_team.to_json(),
-#                     "game_time":str(self.game_time)})
         
+        
+class GamePickResponse(ModelMixin):
+    
+    fb_user_id = db.StringProperty()
+    
+    db.ReferenceProperty(GamePick)
+    
+    agree = db.BooleanProperty()
+    
+    def to_json():
+        return simplejson.dumps({"id":self.key(),
+                    "agree":self.visiting_team
+                    "home_team":self.home_team
+                    "game_time":str(self.game_time),
+                    "fb_user_id":self.fb_user_id
+                    })
+                    
+                    
