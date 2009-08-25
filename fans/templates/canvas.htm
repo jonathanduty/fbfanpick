@@ -1,5 +1,8 @@
 <html>
 <head>
+	<link  rel="stylesheet" type="text/css" href="/static/style.css" media="screen"/> 
+	<link  rel="stylesheet" type="text/css" href="/static/jquery.autocomplete.css" media="screen"/>
+	<link  rel="stylesheet" type="text/css" href="/static/thickbox.css" media="screen"/>
 </head>
 
 <body>
@@ -11,10 +14,18 @@
 	<script src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php" type="text/javascript">
 	</script>
 	<script src="/static/jquery.fan.js" type-"text/javascript"></script>
-	<style type="text/css" src="/static/style.css"/>
+	<script src="/static/jquery.autocomplete.min.js" type-"text/javascript"></script>
+	<script src="/static/thickbox-compressed.js" type-"text/javascript"></script>
+	
+
+	
 	
 	<script type="text/javascript">
-		$(document).
+		$(document).ready(function() {
+			var data = "Core Selectors Attributes Traversing Manipulation CSS Events Effects Ajax Utilities".split(" ");
+			$("#home-team").autocomplete(data);
+			$("#body").addClass("create-pick-screen");
+		});
 	</script>
 	<script type="text/javascript">
 		// //<![CDATA[ 
@@ -49,13 +60,12 @@
 	</script>
 	
 	<div id="body">
-		<div id="create-pick" class="screen">
-			
-				<label for="home-team">Sports League</label>
-				<select name="league" id="league"/>
+		<div id="create-pick">
+			<form action="">
+
 				
 				<label for="home-team">Home Team</label>
-				<select name="home-team" id="home-team"/>
+				<input type="text" name="home-team" id="home-team"/>
 				<input type="radio" name="group1" value="true"checked="true"> win</input>
 				<br>
 				<label for="visiting-team">Visiting Team</label>
@@ -66,6 +76,7 @@
 				<textarea type="text" id="comments"/>
 			
 				<a href="" id="submit-create-pick">Create Pick</a>
+			</form>
 		</div>
 	
 		<div id="verify-pick" class="screen">
@@ -75,7 +86,7 @@
 				<input type="radio" name="group1" value="true"checked="true"> win</input>
 				<br>
 				<label for="visiting-team">Visiting Team</label>
-				<input type="text" id="visiting-team"/>
+				<input type="text" id="visiting-team"></input>
 				<input type="radio" name="group1" value="true" >win</input>
 				<br>
 				<label for="comments">Comments</label>
