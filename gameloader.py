@@ -11,8 +11,8 @@ class GameLoader(bulkloader.Loader):
         bulkloader.Loader.__init__(self,'Game',
                                 [('league',str),
                                 ('game_date',lambda x: datetime.datetime.strptime(x, '%Y-%m-%d').date()),
-                                 ('team_a',str),
-                                 ('team_b',str),]
+                                 ('home_team',str),
+                                 ('visiting_team',str),]
                                  )
                                 
 

@@ -3,7 +3,7 @@ import cherrypy
 from mako.template import Template
 from mako.lookup import TemplateLookup
 from django.utils import simplejson
-
+from fans.model import Game
 
 _abspath_to_here = os.path.abspath( os.path.dirname(__file__) )
 _template_lookup = TemplateLookup(directories=[os.path.join(_abspath_to_here,'templates')],format_exceptions=True)
@@ -25,10 +25,12 @@ class FacebookAppController(object):
         
     @cherrypy.expose
     def canvas(self,**kwargs):
-        return render("canvas.htm",{})
+        
+        return render("canvas.htm",{"games":Game.get_cached_games_json()})
     
     
     
+        
 
         
         
