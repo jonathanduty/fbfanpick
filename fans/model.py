@@ -11,46 +11,47 @@ class ModelMixin(db.Model):
     id_ = property(__get_key)
 
 
-        
-        
-class GamePick(ModelMixin):
+
+
+class Game(ModelMixin):
+    
+    
+    team_a = db.StringProperty()
+    team_b = db.StringProperty()
+    league = db.StringProperty()
+    
+    
+    game_date = db.DateProperty(required=False)
+    
+    
+    
+    
+class Pick(ModelMixin):
     
     
     fb_user_id = db.StringProperty()
     
-    home_team = db.StringProperty()
+    game = db.ReferenceProperty(Game)
+
+    response_to = db.SelfReferenceProperty(collection_name="responses_set")
     
-    visitor_team = db.StringProperty()
-    
-    
-    game_time = db.DateTimeProperty(required=False)
-    
-    home_team_winner = db.BooleanProperty()
+    home_a_winner = db.BooleanProperty()
     
     def to_json():
         return simplejson.dumps({"id":self.key(),
-                    "visiting_team":self.visiting_team
+                    "visiting_team":self.visiting_team,
                     "home_team":self.home_team,
                     "game_time":str(self.game_time),
                     "fb_user_id":self.fb_user_id
                     })
         
         
-        
-class GamePickResponse(ModelMixin):
+    def __agree_with_parent(self):
+        if response_to is not None:
+            return self.home_a_winner == response_to.home_a_winner
+        return False
     
-    fb_user_id = db.StringProperty()
-    
-    db.ReferenceProperty(GamePick)
-    
-    agree = db.BooleanProperty()
-    
-    def to_json():
-        return simplejson.dumps({"id":self.key(),
-                    "agree":self.visiting_team
-                    "home_team":self.home_team
-                    "game_time":str(self.game_time),
-                    "fb_user_id":self.fb_user_id
-                    })
+    agree = property(__agree_with_parent)
+
                     
                     
