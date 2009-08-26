@@ -3,6 +3,8 @@
 	<link  rel="stylesheet" type="text/css" href="/static/style.css" media="screen"/> 
 	<link  rel="stylesheet" type="text/css" href="/static/jquery.autocomplete.css" media="screen"/>
 	<link  rel="stylesheet" type="text/css" href="/static/thickbox.css" media="screen"/>
+	<link type="text/css" href="http://jqueryui.com/latest/themes/base/ui.all.css" rel="stylesheet" />
+  
 </head>
 
 <body>
@@ -20,63 +22,198 @@
 
 	
 	
-	<script type="text/javascript">
+	 <script type="text/javascript">
 		$(document).ready(function() {
-			var games = ${games}
-			var data = "Core Selectors Attributes Traversing Manipulation CSS Events Effects Ajax Utilities".split(" ");
-			$("#home-team").autocomplete(data);
-			$("#body").addClass("create-pick-screen");
+			
+			
+			$("#body").addClass("pick-game-screen")
+			
+			var dateData = null;
+			var selectedItem = null;
+			
+			$("#datepicker").datepicker({
+					onSelect: function(dateText, inst) {
+						parts = dateText.split("/");
+						$.ajax( {
+							async:true,
+							data:{month:parts[0],
+								  day:parts[1],
+								  year:parts[2]
+							},
+							dataType:"json",
+							url:"/games",
+							success:function(data,textStatus) {
+								dateData = data;
+								$("#body").trigger("DateChanged");
+							}
+						});
+							 
+					} // onselect
+				}
+				
+		   );
+		
+			$("#body").bind("DateChanged",function() {
+				table = $("#game-table");
+				table.empty();
+				if ( dateData == null) {
+					table.append("<div class='no-games'>No Games This Day</div>");
+					return;
+				}
+				
+				// a map to lookup games by id
+				var lookup = {};
+				for (var i=0;i<dateData.length;i++) {
+					row = $("<div class='table-row'></div>");
+					home = $("<div class='home-team'></div");
+					home.text(dateData[i].home_team);
+					row.append(home);
+					
+					visiting = $("<div class='visiting-team'></div");
+					visiting.text(dateData[i].visiting_team);
+					row.append(visiting);
+					
+					league = $("<div class='league'></div");
+					league.text(dateData[i].league);
+					row.append(league);
+					
+					title = $("<div class='title'></div");
+					title.text(dateData[i].game_title);
+					row.append(title);
+					
+					// hidden span
+					id = $("<div class='id'></div");
+					id.text(dateData[i].id);
+					row.append(id);
+					
+					row.addClass("fbbluebox");
+					if (i % 2 == 0) {
+						row.addClass("odd-row");
+					}
+					else {
+						row.addClass("even-row");
+					}
+					
+					table.append(row);
+					lookup[dateData[i].id] = dateData[i];
+					
+					
+					
+					$(row).click(function() {
+						var id = $(".id",$(this)).text();
+						selectedItem = lookup[id];
+						$("#body").trigger("GameSelected");
+						
+					});
+				}
+			});
+			
+			
+			// create pick screen
+			
+			$("#body").bind("GameSelected",function() {
+				if (selectedItem == null) {
+					return;
+				}
+				
+				$("#body").removeClass("pick-game-screen");
+				$("#body").addClass("create-pick-screen");
+				
+				
+				$("#home_team_radio").text(selectedItem.home_team);
+				$("#visiting_team_radio").text(selectedItem.visiting_team);
+				
+				
+				
+			});
+			
+			$("#submit-create-pick").click(function() {
+				$.ajax( {
+					async:true,
+					data:{userid:FB.Facebook.apiClient.get_session().uid,
+						  game_id:selectedItem.id,
+						  comments:$("#comments").val(),
+						  home_win:$("input[name='home_winner']:checked").val()
+					},
+					dataType:"json",
+					url:"/submit",
+					success:function(data,textStatus) {
+						alert("submitted");
+					}
+				});
+				return null;
+			});
+			
+		});
+	    
+	</script>
+	<script type="text/javascript">
+		var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
+		var channel_path = '/static/xd_receiver.htm';
+		FB_RequireFeatures(["Api"], function(){
+		    // Create an ApiClient object, passing app's API key and 
+		    // a site relative URL to xd_receiver.htm
+		    FB.Facebook.init(api_key, channel_path);
+		    
+		    var api = FB.Facebook.apiClient;
+		    // require user to login 
+		    api.requireLogin(function(exception){
+		        FB.FBDebug.logLevel=1;
+		        FB.FBDebug.dump("Current user id is " + api.get_session().uid);
+		
+		
+				
+		        // Get friends list 
+		        
+		       //5-14-09: this code below is broken, correct code follows 
+		       //api.friends_get(null, function(result){
+		       //     Debug.dump(result, 'friendsResult from non-batch execution ');
+		       // });
+		
+		         api.friends_get(new Array(), function(result, exception){
+		              FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
+		         });
+		    });
 		});
 	</script>
-	<script type="text/javascript">
-		// //<![CDATA[ 
-		// var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
-		// var channel_path = '/static/xd_receiver.htm';
-		// FB_RequireFeatures(["Api"], function(){
-		//     // Create an ApiClient object, passing app's API key and 
-		//     // a site relative URL to xd_receiver.htm
-		//     FB.Facebook.init(api_key, channel_path);
-		//     
-		//     var api = FB.Facebook.apiClient;
-		//     // require user to login 
-		//     api.requireLogin(function(exception){
-		//         FB.FBDebug.logLevel=1;
-		//         FB.FBDebug.dump("Current user id is " + api.get_session().uid);
-		// 
-		// 
-		// 		
-		//         // Get friends list 
-		//         
-		//        //5-14-09: this code below is broken, correct code follows 
-		//        //api.friends_get(null, function(result){
-		//        //     Debug.dump(result, 'friendsResult from non-batch execution ');
-		//        // });
-		// 
-		//          api.friends_get(new Array(), function(result, exception){
-		//               FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
-		//          });
-		//     });
-		// });
-		// //]]>
-	</script>
 	
-	<div id="body">
-		<div id="create-pick">
-			<form action="">
-
-				
-				<label for="home-team">Home Team</label>
-				<input type="text" name="home-team" id="home-team"/>
-				<input type="radio" name="group1" value="true"checked="true"> win</input>
-				<br>
-				<label for="visiting-team">Visiting Team</label>
-				<select name="visiting-team" id="visiting-team"/>
-				<input type="radio" name="group1" value="true" >win</input>
-				<br>
-				<label for="comments">Comments</label>
-				<textarea type="text" id="comments"/>
+	<div id="body" class="fbbody">
+		<div id="pick-game" class="screen">
+			<div id="description" class="fbgreybox" >
+				Use the calendar to view games on a particular date.  Then choose a game on the right to predict.
+			</div>
+			<div id="datepicker-container" >
+				<div type="text" id="datepicker"></div>
+			</div>
 			
-				<a href="" id="submit-create-pick">Create Pick</a>
+			<div id="game-table" class="fbgreybox">
+			</div>
+		</div>
+		<div id="create-pick" class="screen">
+			<form action="">
+				<div class="fbgreybox">
+					Who do you think will win?
+				
+					<ul>
+						<li>
+						<input type="radio" name="home_winner" value="true" checked="true" id="home_team_radio"></input>
+						</li>
+						<li>
+						<input type="radio" name="home_winner" value="false" id="visiting_team_radio" ></input>
+						</li>
+					</ul>
+				</div>
+				<div class="fbgreybox">
+						<p>
+							Talk all the smack you want (optional, but fun).  
+						</p>
+					<label for="comments">Comments</label>
+					<textarea type="text" id="comments"></textarea>
+				</div>
+				<p id="submit-create-pick">Create Pick</a>
+				<br/>
+				<p id="cancel-create-pick">Cancel</a>
+				
 			</form>
 		</div>
 	

@@ -11,8 +11,142 @@
     display: block;
 }
 
+.pick-game-screen #pick-game{
+    display: block;
+}
 
 .review-pick-screen #review-pick{
     display: block;
 }
 
+#datepicker-container {
+    width: 300px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 50;
+} 
+#game-table {
+    height:100%;
+    position: absolute;
+    left: 300;
+    right: 0;
+    top: 50;
+    bottom: 0;
+    overflow: scroll;
+}
+
+#create-pick .fbgreybox {
+    margin-top: 3px;
+}
+
+li {
+    list-style-type:none; 
+}
+
+/*#game-table .odd-row {
+    border-bottom: 1px solid rgb(229, 234, 241);
+    background-color: rgb(236, 239, 245);
+    margin-top: 1px;
+    font-size: 11px;
+}
+
+#game-table .even-row {
+    border-bottom: 1px solid rgb(229, 234, 241);
+    background-color: rgb(236, 239, 245);
+    margin-top: 1px;
+    font-size: 11px;    
+    
+}*/
+
+#game-table .id {
+
+    display: none;
+}
+
+
+
+/** Facebook Styles **/
+/* Default Facebook CSS */
+.fbbody
+{
+    font-family: "lucida grande" ,tahoma,verdana,arial,sans-serif;
+    font-size: 11px;
+    color: #333333;
+}
+/* Default Anchor Style */
+.fbbody a
+{
+    color: #3b5998;
+    outline-style: none;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+}
+.fbbody a:hover
+{
+    text-decoration: underline;
+}
+/* Facebook Box Styles */
+.fbgreybox
+{
+    background-color: #f7f7f7;
+    border: 1px solid #cccccc;
+    color: #333333;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.fbbluebox
+{
+    background-color: #eceff6;
+    border: 1px solid #d4dae8;
+    color: #333333;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.fbinfobox
+{
+    background-color: #fff9d7;
+    border: 1px solid #e2c822;
+    color: #333333;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.fberrorbox
+{
+    background-color: #ffebe8;
+    border: 1px solid #dd3c10;
+    color: #333333;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+/* Content Divider on White Background */
+.fbcontentdivider
+{
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 520px;
+    height: 1px;
+    background-color: #d8dfea;
+}
+/* Facebook Tab Style */
+.fbtab
+{
+    padding: 8px;
+    background-color: #d8dfea;
+    color: #3b5998;
+    font-weight: bold;
+    float: left;
+    margin-right: 4px;
+    text-decoration: none;
+}
+.fbtab:hover
+{
+    background-color: #3b5998;
+    color: #ffffff;
+    cursor: hand;
+}

@@ -5,6 +5,16 @@ import datetime
 
 
 _GAME_CACHE_KEY = "games"
+_GAME_DAY_CACHE_KEY = "games_%(year)s_%(month)s_%(day)s"
+
+def generate_day_key(game_date):
+    
+    return _GAME_DAY_CACHE_KEY % {
+        "year":game_date.year,
+        "month":game_date.month,
+        "day":game_date.day
+    
+    }
 
 
 class ModelMixin(db.Model):
@@ -69,6 +79,21 @@ class Game(ModelMixin):
             json = klass.generate_monthly_json_cache()
         return json
         
+    @classmethod
+    def fill_games_for_day(klass,date):
+        games = Game.gql("where game_date = :1",date).fetch(limit=1000)
+        json = simplejson.dumps([game.to_json_map() for game in games])
+        memcache.set(generate_day_key(date),json)
+        return json
+    
+    @classmethod
+    def get_games_by_day(klass,date):
+        
+        json = memcache.get(generate_day_key(date))
+        if json is None:
+            json = klass.fill_games_for_day(date)
+        return json  
+        
     
 class Pick(ModelMixin):
     
@@ -83,11 +108,10 @@ class Pick(ModelMixin):
     
     
     
-    def to_json():
-        return simplejson.dumps({"id":self.key(),
-                    "visiting_team":self.visiting_team,
-                    "home_team":self.home_team,
-                    "game_time":str(self.game_time),
+    def to_json(self):
+        return simplejson.dumps({"id":self.id_,
+                    "game":self.game.to_json(),
+                    "home_winner":self.home_winner,
                     "fb_user_id":self.fb_user_id
                     })
         
