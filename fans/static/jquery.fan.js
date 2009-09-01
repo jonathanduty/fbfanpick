@@ -2,6 +2,13 @@
     
     var searchURL = "http://api.yelp.com/business_review_search?term="
     
+    
+    
+    
+    jQuery.fn.facebook = function()
+    
+    
+    
     jQuery.fn.gameSelection = function(api_key) {
         
         

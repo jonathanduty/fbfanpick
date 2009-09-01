@@ -1,9 +1,10 @@
 import os
+import logging
 import cherrypy
 from mako.template import Template
 from mako.lookup import TemplateLookup
 from django.utils import simplejson
-from fans.model import Game,Pick        
+from fans.model import Game,Pick,FacebookUser     
 import datetime
 _abspath_to_here = os.path.abspath( os.path.dirname(__file__) )
 _template_lookup = TemplateLookup(directories=[os.path.join(_abspath_to_here,'templates')],format_exceptions=True)
@@ -21,12 +22,42 @@ class FacebookAppController(object):
     
     def __init__(self):
         pass
+    
+    
+    
+    @cherrypy.expose
+    def authorize(self,fb_sig_user,fb_sig_time,fb_sig_authorize,fb_sig):
+        
+        user = FacebookUser.get_by_uid(fb_sig_user)
+        if user is None:
+            user = FacebookUser(uid=fb_sig_user,
+                            active=True,
+                    )
+        
+    @cherrypy.expose
+    def remove(self,fb_sig_user,**kwargs):
+        user = FacebookUser.get_by_uid(fb_sig_user)
+        if user is not None:
+            user.active = False
+            user.put()
         
         
     @cherrypy.expose
-    def canvas(self,**kwargs):
+    def canvas(self,parent_id=None,**kwargs):
         
-        return render("canvas.htm",{"games":Game.get_cached_games_json()})
+        # assign parent to javascript null
+        parent = None
+        parent_json = "null"
+        
+        if parent_id is not None:
+            parent = Pick.get_by_id(int(parent_id))
+            parent_json = parent.to_json()
+
+             
+        logging.info( parent_json)
+        logging.info(simplejson.dumps({"test":"jonathan"}))
+        return render("canvas.htm",{"parent_json":parent_json,
+                                    "parent":parent})
     
     
     @cherrypy.expose
@@ -43,7 +74,7 @@ class FacebookAppController(object):
         
         parent = None
         if "parent_id" in kvargs.keys():
-            parent = Pick.get_by_id(int(parent_id))
+            parent = Pick.get_by_id(int(kvargs["parent_id"]))
             
         game = Game.get_by_id(int(game_id))
         pick = Pick(

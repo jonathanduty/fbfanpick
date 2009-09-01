@@ -24,6 +24,21 @@ class ModelMixin(db.Model):
     
     id_ = property(__get_key)
   
+  
+class FacebookUser(ModelMixin):
+    
+    uid = db.StringProperty()
+    active = db.BooleanProperty(default=False)
+    active_date = db.DateTimeProperty()
+    deactive_date = db.DateTimeProperty(required=False)
+    authorized_stream = db.DateTimeProperty(default=False)
+    
+    @classmethod
+    def get_by_uid(klass,uid):
+        return klass.gql("where uid = :1",uid).get()
+    
+    
+    
 
 class Game(ModelMixin):
     
@@ -107,13 +122,15 @@ class Pick(ModelMixin):
     home_winner = db.BooleanProperty()
     
     
-    
-    def to_json(self):
-        return simplejson.dumps({"id":self.id_,
-                    "game":self.game.to_json(),
+    def to_json_map(self):
+        return {"id":self.id_,
+                    "game":self.game.to_json_map(),
                     "home_winner":self.home_winner,
                     "fb_user_id":self.fb_user_id
-                    })
+                    }
+    
+    def to_json(self):
+        return simplejson.dumps(self.to_json_map())
         
         
     def __agree_with_parent(self):

@@ -15,21 +15,43 @@
 	</script>
 	<script src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php" type="text/javascript">
 	</script>
-	<script src="/static/jquery.fan.js" type-"text/javascript"></script>
 	<script src="/static/jquery.autocomplete.min.js" type-"text/javascript"></script>
 	<script src="/static/thickbox-compressed.js" type-"text/javascript"></script>
 	
-
+	<script type="text/javascript">
+		var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
+		var channel_path = '/static/xd_receiver.htm';
+		var parent = ${parent_json};
+		
+		
+		
+		FB_RequireFeatures(["Api"], function(){
+		
+	    	FB.Facebook.init(api_key, channel_path);
+	
+	        var api = FB.Facebook.apiClient;
+		
+			api.requireLogin(function(exception){
+				api.friends_get(new Array(), function(result, exception){
+	 		              FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
+	 		         });
+			});
+		});
+		
+		
+	</script>
 	
 	
 	 <script type="text/javascript">
 		$(document).ready(function() {
 			
 			
-			$("#body").addClass("pick-game-screen")
+			var feedTemplateId = "143491101254";
+			
+			
 			
 			var dateData = null;
-			var selectedItem = null;
+			selectedItem = null;
 			
 			$("#datepicker").datepicker({
 					onSelect: function(dateText, inst) {
@@ -62,7 +84,7 @@
 				}
 				
 				// a map to lookup games by id
-				var lookup = {};
+				lookup = {};
 				for (var i=0;i<dateData.length;i++) {
 					row = $("<div class='table-row'></div>");
 					home = $("<div class='home-team'></div");
@@ -106,32 +128,45 @@
 						
 					});
 				}
-			});
+				
+				
+				
+				
+			}); //DateChanged
 			
 			
 			// create pick screen
 			
-			$("#body").bind("GameSelected",function() {
+			var showCreatePick = function() {
 				if (selectedItem == null) {
 					return;
 				}
-				
 				$("#body").removeClass("pick-game-screen");
+				alert(selectedItem);
+				
+				
+				$("#home_team_radio_label").text(selectedItem.home_team);
+				$("#visiting_team_radio_label").text(selectedItem.visiting_team);
+				$("#create-pick-title").text(selectedItem.home_team + " vs "+ selectedItem.visiting_team + " on "+ selectedItem.game_time);
 				$("#body").addClass("create-pick-screen");
 				
+			}
+			
+			$("#body").bind("GameSelected",function() {
 				
-				$("#home_team_radio").text(selectedItem.home_team);
-				$("#visiting_team_radio").text(selectedItem.visiting_team);
-				
-				
-				
+				showCreatePick();
 			});
 			
 			$("#submit-create-pick").click(function() {
+				var parent_id = -1;
+				if (parent != null) {
+					parent_id = parent.id;
+				}
 				$.ajax( {
 					async:true,
 					data:{userid:FB.Facebook.apiClient.get_session().uid,
 						  game_id:selectedItem.id,
+						  parent_id:parent_id,
 						  comments:$("#comments").val(),
 						  home_win:$("input[name='home_winner']:checked").val()
 					},
@@ -144,40 +179,36 @@
 				return null;
 			});
 			
+			
+			$("#cancel-create-pick").click(function() {
+				$("#body").removeClass("create-pick-screen");
+				$("#body").addClass("pick-game-screen");
+				selectedItem = null;
+				
+			});
+			
+			
+			
+			// figure out which screen we should show first.
+			if (parent == null) {
+				$("#body").addClass("pick-game-screen")
+			}
+			else {
+				// have the selected item be the game of the parent	
+				selectedItem = parent.game;
+				showCreatePick();
+			}
 		});
 	    
 	</script>
-	<script type="text/javascript">
-		var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
-		var channel_path = '/static/xd_receiver.htm';
-		FB_RequireFeatures(["Api"], function(){
-		    // Create an ApiClient object, passing app's API key and 
-		    // a site relative URL to xd_receiver.htm
-		    FB.Facebook.init(api_key, channel_path);
-		    
-		    var api = FB.Facebook.apiClient;
-		    // require user to login 
-		    api.requireLogin(function(exception){
-		        FB.FBDebug.logLevel=1;
-		        FB.FBDebug.dump("Current user id is " + api.get_session().uid);
-		
-		
-				
-		        // Get friends list 
-		        
-		       //5-14-09: this code below is broken, correct code follows 
-		       //api.friends_get(null, function(result){
-		       //     Debug.dump(result, 'friendsResult from non-batch execution ');
-		       // });
-		
-		         api.friends_get(new Array(), function(result, exception){
-		              FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
-		         });
-		    });
-		});
-	</script>
+
 	
+	<div id="advertising-leaderboard">
+		<img src="/static/leaderboard_img.jpg"/>
+	</div>
 	<div id="body" class="fbbody">
+		
+		
 		<div id="pick-game" class="screen">
 			<div id="description" class="fbgreybox" >
 				Use the calendar to view games on a particular date.  Then choose a game on the right to predict.
@@ -189,33 +220,48 @@
 			<div id="game-table" class="fbgreybox">
 			</div>
 		</div>
+		
+		
+		
 		<div id="create-pick" class="screen">
 			<form action="">
+				<div class="fbgreybox" id="create-pick-title">
+				</div>
+				
+				<div class="fbgreybox" id="create-pick-title" class="fbgreybox">
+					
+				</div>
+
 				<div class="fbgreybox">
 					Who do you think will win?
 				
 					<ul>
 						<li>
-						<input type="radio" name="home_winner" value="true" checked="true" id="home_team_radio"></input>
+						<input type="radio" name="home_winner" value="true" checked="true" id="home_team_radio"/>
+						<label id="home_team_radio_label" for="home_team_radio"></label>
+						
 						</li>
 						<li>
-						<input type="radio" name="home_winner" value="false" id="visiting_team_radio" ></input>
+						<input type="radio" name="home_winner" value="false" id="visiting_team_radio" />
+						<label id="visiting_team_radio_label" for="visiting_team_radio"></label>
+						
 						</li>
 					</ul>
 				</div>
-				<div class="fbgreybox">
-						<p>
-							Talk all the smack you want (optional, but fun).  
-						</p>
-					<label for="comments">Comments</label>
-					<textarea type="text" id="comments"></textarea>
-				</div>
-				<p id="submit-create-pick">Create Pick</a>
-				<br/>
-				<p id="cancel-create-pick">Cancel</a>
+				
+				<ul id="create-pick-selection">
+					<li>
+						<a id="submit-create-pick">Create Pick</a>
+					</li>
+					<li>
+						<a id="cancel-create-pick">Cancel</a>
+					</li>
+				</ul>
 				
 			</form>
 		</div>
+	
+		
 	
 		<div id="verify-pick" class="screen">
 				<p>Please Review your Pick</p>
@@ -235,5 +281,9 @@
 				
 		</div>
 	</div>
+	
+	
+	
+	
 </body>
 </html>
