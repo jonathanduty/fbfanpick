@@ -18,186 +18,208 @@
 	<script src="/static/jquery.autocomplete.min.js" type-"text/javascript"></script>
 	<script src="/static/thickbox-compressed.js" type-"text/javascript"></script>
 	
-	<script type="text/javascript">
-		var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
-		var channel_path = '/static/xd_receiver.htm';
-		var parent = ${parent_json};
-		
-		
-		
-		FB_RequireFeatures(["Api"], function(){
-		
-	    	FB.Facebook.init(api_key, channel_path);
-	
-	        var api = FB.Facebook.apiClient;
-		
-			api.requireLogin(function(exception){
-				api.friends_get(new Array(), function(result, exception){
-	 		              FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
-	 		         });
-			});
-		});
-		
-		
-	</script>
+
 	
 	
 	 <script type="text/javascript">
-		$(document).ready(function() {
+	
+		var api_key = 'dda2adcf9ab358e7fe0457db6be8318b';
+		var channel_path = '/static/xd_receiver.htm';
+		var parent = ${parent_json};
+
+		var api = null;
+		var lookup = null;
 			
-			
-			var feedTemplateId = "143491101254";
-			
-			
-			
-			var dateData = null;
-			selectedItem = null;
-			
-			$("#datepicker").datepicker({
-					onSelect: function(dateText, inst) {
-						parts = dateText.split("/");
-						$.ajax( {
-							async:true,
-							data:{month:parts[0],
-								  day:parts[1],
-								  year:parts[2]
-							},
-							dataType:"json",
-							url:"/games",
-							success:function(data,textStatus) {
-								dateData = data;
-								$("#body").trigger("DateChanged");
-							}
-						});
-							 
-					} // onselect
-				}
-				
-		   );
+		var feedTemplateId = "143491101254";
 		
-			$("#body").bind("DateChanged",function() {
-				table = $("#game-table");
-				table.empty();
-				if ( dateData == null) {
-					table.append("<div class='no-games'>No Games This Day</div>");
-					return;
+		var dateData = null;
+		var selectedItem = null;
+		
+		
+		var setupMVC = function() {
+				$("#datepicker").datepicker({
+						onSelect: function(dateText, inst) {
+							parts = dateText.split("/");
+							$.ajax( {
+								async:true,
+								data:{month:parts[0],
+									  day:parts[1],
+									  year:parts[2]
+								},
+								dataType:"json",
+								url:"/games",
+								success:function(data,textStatus) {
+									dateData = data;
+									$("#body").trigger("DateChanged");
+								}
+							});
+
+						} // onselect
+					}
+
+			   );
+
+				$("#body").bind("DateChanged",function() {
+					table = $("#game-table");
+					table.empty();
+					if ( dateData == null) {
+						table.append("<div class='no-games'>No Games This Day</div>");
+						return;
+					}
+
+					// a map to lookup games by id
+					lookup = {};
+					for (var i=0;i<dateData.length;i++) {
+						row = $("<div class='table-row'></div>");
+						home = $("<div class='home-team'></div");
+						home.text(dateData[i].home_team);
+						row.append(home);
+
+						visiting = $("<div class='visiting-team'></div");
+						visiting.text(dateData[i].visiting_team);
+						row.append(visiting);
+
+						league = $("<div class='league'></div");
+						league.text(dateData[i].league);
+						row.append(league);
+
+						title = $("<div class='title'></div");
+						title.text(dateData[i].game_title);
+						row.append(title);
+
+						// hidden span
+						id = $("<div class='id'></div");
+						id.text(dateData[i].id);
+						row.append(id);
+
+						row.addClass("fbbluebox");
+						if (i % 2 == 0) {
+							row.addClass("odd-row");
+						}
+						else {
+							row.addClass("even-row");
+						}
+
+						table.append(row);
+						lookup[dateData[i].id] = dateData[i];
+
+
+
+						$(row).click(function() {
+							var id = $(".id",$(this)).text();
+							selectedItem = lookup[id];
+							$("#body").trigger("GameSelected");
+
+						});
+					}
+
+
+
+
+				}); //DateChanged
+
+
+				var resetScreen = function() {
+					$("#body").removeClass("pick-game-screen");
+					$("#body").removeClass("create-pick-screen");
+
 				}
-				
-				// a map to lookup games by id
-				lookup = {};
-				for (var i=0;i<dateData.length;i++) {
-					row = $("<div class='table-row'></div>");
-					home = $("<div class='home-team'></div");
-					home.text(dateData[i].home_team);
-					row.append(home);
-					
-					visiting = $("<div class='visiting-team'></div");
-					visiting.text(dateData[i].visiting_team);
-					row.append(visiting);
-					
-					league = $("<div class='league'></div");
-					league.text(dateData[i].league);
-					row.append(league);
-					
-					title = $("<div class='title'></div");
-					title.text(dateData[i].game_title);
-					row.append(title);
-					
-					// hidden span
-					id = $("<div class='id'></div");
-					id.text(dateData[i].id);
-					row.append(id);
-					
-					row.addClass("fbbluebox");
-					if (i % 2 == 0) {
-						row.addClass("odd-row");
+
+				var showChooseGame = function() {
+					resetScreen();
+					parent = null;
+					selectedItem = null;
+					$("#body").addClass("pick-game-screen");
+				}
+
+				// create pick screen
+				var showCreatePick = function() {
+					resetScreen();
+					if (selectedItem == null) {
+						return;
+					}
+
+					parentDiv = $("create-pick-parent");
+
+					if (parent !=null) {
+						alert(api);
+						var results = api.Users.getInfo([parent.fb_user_id]);
+						console.debug(results);
 					}
 					else {
-						row.addClass("even-row");
+
 					}
-					
-					table.append(row);
-					lookup[dateData[i].id] = dateData[i];
-					
-					
-					
-					$(row).click(function() {
-						var id = $(".id",$(this)).text();
-						selectedItem = lookup[id];
-						$("#body").trigger("GameSelected");
-						
-					});
-				}
-				
-				
-				
-				
-			}); //DateChanged
-			
-			
-			// create pick screen
-			
-			var showCreatePick = function() {
-				if (selectedItem == null) {
-					return;
-				}
-				$("#body").removeClass("pick-game-screen");
-				alert(selectedItem);
-				
-				
-				$("#home_team_radio_label").text(selectedItem.home_team);
-				$("#visiting_team_radio_label").text(selectedItem.visiting_team);
-				$("#create-pick-title").text(selectedItem.home_team + " vs "+ selectedItem.visiting_team + " on "+ selectedItem.game_time);
-				$("#body").addClass("create-pick-screen");
-				
-			}
-			
-			$("#body").bind("GameSelected",function() {
-				
-				showCreatePick();
-			});
-			
-			$("#submit-create-pick").click(function() {
-				var parent_id = -1;
-				if (parent != null) {
-					parent_id = parent.id;
-				}
-				$.ajax( {
-					async:true,
-					data:{userid:FB.Facebook.apiClient.get_session().uid,
-						  game_id:selectedItem.id,
-						  parent_id:parent_id,
-						  comments:$("#comments").val(),
-						  home_win:$("input[name='home_winner']:checked").val()
-					},
-					dataType:"json",
-					url:"/submit",
-					success:function(data,textStatus) {
-						alert("submitted");
-					}
+
+
+					$("#home_team_radio_label").text(selectedItem.home_team);
+					$("#visiting_team_radio_label").text(selectedItem.visiting_team);
+					$("#create-pick-title").text(selectedItem.home_team + " vs "+ selectedItem.visiting_team + " on "+ selectedItem.game_time);
+					$("#body").addClass("create-pick-screen");
+
+				} // showCreatePick
+
+				$("#body").bind("GameSelected",function() {
+
+					showCreatePick();
 				});
-				return null;
+
+				$("#submit-create-pick").click(function() {
+					var parent_id = -1;
+					if (parent != null) {
+						parent_id = parent.id;
+					}
+					$.ajax( {
+						async:true,
+						data:{userid:FB.Facebook.apiClient.get_session().uid,
+							  game_id:selectedItem.id,
+							  parent_id:parent_id,
+							  comments:$("#comments").val(),
+							  home_win:$("input[name='home_winner']:checked").val()
+						},
+						dataType:"json",
+						url:"/submit",
+						success:function(data,textStatus) {
+							alert("submitted");
+						}
+					}); // $.ajax
+					return false;
+				}); // $("#submit-create-pick").click
+
+
+				$("#cancel-create-pick").click(function() {
+					$("#body").removeClass("create-pick-screen");
+					$("#body").addClass("pick-game-screen");
+					selectedItem = null;
+					return false;
+				});
+
+
+
+				// figure out which screen we should show first.
+				if (parent == null) {
+					showChooseGame();
+				}
+				else {
+					// have the selected item be the game of the parent	
+					selectedItem = parent.game;
+					showCreatePick();
+				}
+		}  //setupMVC
+		
+		$(document).ready(function() {
+			
+			FB_RequireFeatures(["Api"], function(){
+
+		    	FB.Facebook.init(api_key, channel_path);
+
+		        api = FB.Facebook.apiClient;
+
+				api.requireLogin(function(exception){
+						setupMVC();
+				});
 			});
 			
-			
-			$("#cancel-create-pick").click(function() {
-				$("#body").removeClass("create-pick-screen");
-				$("#body").addClass("pick-game-screen");
-				selectedItem = null;
-				
-			});
-			
-			
-			
-			// figure out which screen we should show first.
-			if (parent == null) {
-				$("#body").addClass("pick-game-screen")
-			}
-			else {
-				// have the selected item be the game of the parent	
-				selectedItem = parent.game;
-				showCreatePick();
-			}
+
 		});
 	    
 	</script>
@@ -228,7 +250,7 @@
 				<div class="fbgreybox" id="create-pick-title">
 				</div>
 				
-				<div class="fbgreybox" id="create-pick-title" class="fbgreybox">
+				<div class="fbgreybox" id="create-pick-parent" class="fbgreybox">
 					
 				</div>
 
@@ -251,10 +273,10 @@
 				
 				<ul id="create-pick-selection">
 					<li>
-						<a id="submit-create-pick">Create Pick</a>
+						<a id="submit-create-pick" href="">Create Pick</a>
 					</li>
 					<li>
-						<a id="cancel-create-pick">Cancel</a>
+						<a id="cancel-create-pick" href="">Cancel</a>
 					</li>
 				</ul>
 				
